@@ -20,7 +20,7 @@ body {
 </head>
 
 <body>
-
+  <button onclick="animate()">Do things</button>
 </body>
 
 <script>
@@ -79,30 +79,41 @@ effect.setSize(window.innerWidth, window.innerHeight);
 // Create a VR manager helper to enter and exit VR mode.
 var manager = new WebVRManager(renderer, effect, {hideButton: false});
 
-// Create 3D objects.
-var geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+// Create the home planet
+
 var sphereGeo = new THREE.SphereGeometry(13.5, 32, 32);
 var texture = THREE.ImageUtils.loadTexture('earth.jpg');
+var material = new THREE.MeshBasicMaterial({map: texture});
 
-
-
-var cube = new THREE.Mesh(geometry, material);
 var planet = new THREE.Mesh(sphereGeo, material);
-// Position cube mesh
-cube.position.z = -1;
+// Position planet mesh
+
 planet.position.z = -1;
 planet.position.y = -15; // Planet should be directly below the camera
 
-// Add cube mesh to your three.js scene
-scene.add(cube);
 scene.add(planet);
 
+// Create the skybox as a background
+var boxWidth = 10;
+var txtr_skybox = THREE.ImageUtils.loadTexture('space.jpg');
+txtr_skybox.wrapS = THREE.RepeatWrapping;
+txtr_skybox.wrapT = THREE.RepeatWrapping;
+txtr_skybox.repeat.set(boxWidth, boxWidth);
 
+var geo_skybox = new THREE.BoxGeometry(boxWidth, boxWidth, boxWidth);
+var mat_skybox = new THREE.MeshBasicMaterial({
+          map: txtr_skybox,
+          color: 0xffffff,
+          side: THREE.BackSide});
+
+var skybox = new THREE.Mesh(geo_skybox, mat_skybox);
+
+scene.add(skybox);
 
 // Request animation frame loop function
 function animate() {
   // Apply rotation to cube mesh
-  cube.rotation.y += 0.01;
+  planet.rotation.y += 0.001;
 
   // Update VR headset position and apply to camera.
   controls.update();
@@ -114,7 +125,7 @@ function animate() {
 }
 
 // Kick off animation loop
-animate();
+
 
 // Reset the position sensor when 'z' pressed.
 function onKey(event) {
