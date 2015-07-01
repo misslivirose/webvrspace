@@ -81,11 +81,11 @@ var manager = new WebVRManager(renderer, effect, {hideButton: false});
 
 // Create the home planet
 
-var sphereGeo = new THREE.SphereGeometry(13.5, 32, 32);
-var texture = THREE.ImageUtils.loadTexture('earth.jpg');
-var material = new THREE.MeshBasicMaterial({map: texture});
+var geo_earth = new THREE.SphereGeometry(13.5, 32, 32);
+var txtr_earth = THREE.ImageUtils.loadTexture('earth.jpg');
+var mat_earth = new THREE.MeshBasicMaterial({map: txtr_earth});
 
-var planet = new THREE.Mesh(sphereGeo, material);
+var planet = new THREE.Mesh(geo_earth, mat_earth);
 // Position planet mesh
 
 planet.position.z = -1;
@@ -94,11 +94,11 @@ planet.position.y = -15; // Planet should be directly below the camera
 scene.add(planet);
 
 // Create the skybox as a background
-var boxWidth = 10;
+var boxWidth = 30;
 var txtr_skybox = THREE.ImageUtils.loadTexture('space.jpg');
 txtr_skybox.wrapS = THREE.RepeatWrapping;
 txtr_skybox.wrapT = THREE.RepeatWrapping;
-txtr_skybox.repeat.set(boxWidth, boxWidth);
+//txtr_skybox.repeat.set(2, 2);
 
 var geo_skybox = new THREE.BoxGeometry(boxWidth, boxWidth, boxWidth);
 var mat_skybox = new THREE.MeshBasicMaterial({
@@ -107,13 +107,24 @@ var mat_skybox = new THREE.MeshBasicMaterial({
           side: THREE.BackSide});
 
 var skybox = new THREE.Mesh(geo_skybox, mat_skybox);
-
 scene.add(skybox);
+
+// Create moon
+var geo_moon = new THREE.SphereGeometry(2, 32, 32);
+var txtr_moon = THREE.ImageUtils.loadTexture('moon.jpg');
+var mat_moon = new THREE.MeshBasicMaterial({map: txtr_moon});
+
+var moon = new THREE.Mesh(geo_moon, mat_moon);
+
+moon.position.z = -12;
+moon.position.x = -7;
+moon.position.y = 2;
+scene.add(moon);
 
 // Request animation frame loop function
 function animate() {
   // Apply rotation to cube mesh
-  planet.rotation.y += 0.001;
+  planet.rotation.y += 0.0001;
 
   // Update VR headset position and apply to camera.
   controls.update();
