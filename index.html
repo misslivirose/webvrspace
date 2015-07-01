@@ -110,22 +110,38 @@ var skybox = new THREE.Mesh(geo_skybox, mat_skybox);
 scene.add(skybox);
 
 // Create moon
-var geo_moon = new THREE.SphereGeometry(2, 32, 32);
+var geo_moon = new THREE.SphereGeometry(1, 32, 32);
 var txtr_moon = THREE.ImageUtils.loadTexture('moon.jpg');
 var mat_moon = new THREE.MeshBasicMaterial({map: txtr_moon});
 
 var moon = new THREE.Mesh(geo_moon, mat_moon);
 
 moon.position.z = -12;
-moon.position.x = -7;
+moon.position.x = 9;
 moon.position.y = 2;
 scene.add(moon);
 
+var degree = 0;
+
 // Request animation frame loop function
 function animate() {
-  // Apply rotation to cube mesh
+  // Apply rotation to planet
   planet.rotation.y += 0.0001;
-
+  
+  // Radius of moon orbit is 9 
+  // Y value stays constant
+  // X, Z orbits circle: x^2 + z^2 = 81
+  // Use Date.GetSeconds() * 6 for degree value
+  // X, Z = 7cos(s), 7sin(s)
+  function orbit()
+  {
+    moon.position.z =  9 * Math.cos(degree);
+    moon.position.x =  9 * Math.sin(degree);
+    moon.position.y = -9 * Math.cos(degree);
+    degree+= 0.001;
+  }
+  
+  orbit();
   // Update VR headset position and apply to camera.
   controls.update();
 
