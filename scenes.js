@@ -1,73 +1,6 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head>
-<title>Web VR boilerplate (Cardboard and Oculus)</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<style>
-body {
-  background-color: #000;
-  color: #fff;
-  margin: 0px;
-  padding: 0;
-  overflow: hidden;
-}
-
-button{
-  position: absolute;
-  top: 5px;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 64px;
-  height: 64px;
-}
-</style>
-</head>
-
-<body>
-  <button onclick="animate()">Do things</button>
-</body>
-
-<script>
-// Set this to true to enable the polyfill and split screen rendering
-// even if the device is incompatible with Cardboard (eg. desktop).
-// NOTE: This should never be checked in as true.
-CARDBOARD_DEBUG = false;
-</script>
-
-<!--
-  three.js 3d library
-  -->
-<script src="js/deps/three.js"></script>
-
-<!--
-  VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
-   -->
-<script src="js/deps/VRControls.js"></script>
-
-<!--
-  VREffect.js handles stereo camera setup and rendering.
-  -->
-<script src="js/deps/VREffect.js"></script>
-
-<!--
-  A polyfill for WebVR using the Device{Motion,Orientation}Event API.
-  -->
-<script src="js/deps/webvr-polyfill.js"></script>
-
-<!--
-  Helps enter and exit VR mode, provides best practices while in VR.
-  -->
-<script src="build/webvr-manager.js"></script>
-<script>
-  
-  var renderer = new THREE.WebGLRenderer({ antialias: true });
+function createSpaceScene() {
+	//Setup three.js WebGL renderer
+var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 
 // Append the canvas element created by the renderer to document body element.
@@ -189,7 +122,4 @@ function onWindowResize() {
 }
 
 window.addEventListener('resize', onWindowResize, false);
-
-</script>
-
-</html>
+}
