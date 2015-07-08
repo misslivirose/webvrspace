@@ -14,5 +14,5 @@ For the VR version, make sure you are using a supported browser:
 - Firefox Nightly
 
 # Attributions
-Images used in sample are from @StationCDRKelly's Twitter Feed
+Images used in sample are from @StationCDRKelly, @NASA Twitter Feed 
 Background audio is from NASA and is a "recording" of the sound made by Saturn's rings
