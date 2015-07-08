@@ -31,7 +31,7 @@ button{
 </head>
 
 <body>
-  <button onclick="animate()">Do things</button>
+
 </body>
 
 <script>
@@ -66,8 +66,10 @@ CARDBOARD_DEBUG = false;
   -->
 <script src="build/webvr-manager.js"></script>
 <script>
+window.onload = function(){
   
-  var renderer = new THREE.WebGLRenderer({ antialias: true });
+
+var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 
 // Append the canvas element created by the renderer to document body element.
@@ -142,6 +144,16 @@ moon.position.x = 9;
 moon.position.y = 2;
 scene.add(moon);
 
+// Create Image Viewer Mesh
+var geo_img = new THREE.BoxGeometry(4, 3, 1);
+var txtr_img = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source
+txtr_img.minFilter = THREE.NearestFilter;
+var mat_img = new THREE.MeshBasicMaterial({map: txtr_img});
+
+var img = new THREE.Mesh(geo_img, mat_img);
+img.position.z = 4;
+scene.add(img);
+
 var degree = 0;
 
 // Request animation frame loop function
@@ -189,7 +201,8 @@ function onWindowResize() {
 }
 
 window.addEventListener('resize', onWindowResize, false);
-
+animate();
+}
 </script>
 
 </html>
