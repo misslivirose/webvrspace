@@ -67,7 +67,6 @@ CARDBOARD_DEBUG = false;
 <script src="build/webvr-manager.js"></script>
 <script>
 window.onload = function(){
-  
 
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -146,13 +145,26 @@ scene.add(moon);
 
 // Create Image Viewer Mesh
 var geo_img = new THREE.BoxGeometry(4, 3, 1);
-var txtr_img = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source
+var geo_bg = new THREE.BoxGeometry(4.2, 3.2, 1);
+
+var txtr_img = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source in future
 txtr_img.minFilter = THREE.NearestFilter;
+
 var mat_img = new THREE.MeshBasicMaterial({map: txtr_img});
+var mat_bg = new THREE.MeshBasicMaterial();
 
 var img = new THREE.Mesh(geo_img, mat_img);
-img.position.z = 4;
+var img_bg = new THREE.Mesh(geo_bg, mat_bg);
+
+img.position.z = -4.5;
+img_bg.position.z = -4.6;
+img.position.y = 1;
+img_bg.position.y = 1.05;
+
 scene.add(img);
+scene.add(img_bg);
+
+// NASA API Key: nEKxa21udlGswSTSsqjon4Kr5PMf2Ghns6S79FNE
 
 var degree = 0;
 
@@ -185,10 +197,50 @@ function animate() {
 }
 // Reset the position sensor when 'z' pressed.
 function onKey(event) {
+  var key = event.keyCode;
+  
+  switch(key)
+  {
+    case 90:
+      controls.resetSensor(); // z
+      break;
+    case 49:
+      // Change image to 1 on pressing 1
+      img.material.map = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source
+      img.material.needsUpdate = true;
+      break;
+    case 50: 
+      // Change image to 2 on pressing 2 
+      img.material.map = THREE.ImageUtils.loadTexture("img1.jpg"); //We will load in images from online source
+      img.material.needsUpdate = true;
+      break;
+    case 51: 
+      // Change image to 3 on pressing 3
+      img.material.map = THREE.ImageUtils.loadTexture("img2.jpg"); //We will load in images from online source
+      img.material.needsUpdate = true;
+      break;
+    case 52: 
+      // Change image to 4 on pressing 4
+      img.material.map = THREE.ImageUtils.loadTexture("img3.jpg"); //We will load in images from online source
+      img.material.needsUpdate = true;
+      break;
+    case 53: 
+      // Change image to 5 on pressing 5
+      img.material.map = THREE.ImageUtils.loadTexture("img4.jpg"); //We will load in images from online source
+      img.material.needsUpdate = true;
+      break;
+    default: 
+      break;
+  }
   if (event.keyCode == 90) { // z
     controls.resetSensor();
   }
+  else if(event.keyCode == 49){
+    
+  }
 };
+
+
 
 window.addEventListener('keydown', onKey, true);
 
