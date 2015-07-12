@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-<title>Web VR boilerplate (Cardboard and Oculus)</title>
+<title>Space VR</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
@@ -96,6 +96,7 @@ camera.add(listener);
 
 var sound = new THREE.Audio(listener);
 sound.load("saturn.wav");
+sound.repeat = true;
 sound.autoplay = true;
 
 // Create the home planet
@@ -124,7 +125,7 @@ var mat_skybox = new THREE.MeshBasicMaterial({
           map: txtr_skybox,
           color: 0xffffff,
           side: THREE.BackSide});
-          
+
 var geo_sun = new THREE.SphereGeometry(2, 32, 32);
 var mat_sun = new THREE.MeshBasicMaterial({});
 
@@ -172,8 +173,8 @@ var degree = 0;
 function animate() {
   // Apply rotation to planet
   planet.rotation.y += 0.0001;
-  
-  // Radius of moon orbit is 9 
+
+  // Radius of moon orbit is 9
   // Y value stays constant
   // X, Z orbits circle: x^2 + z^2 = 81
   // Use Date.GetSeconds() * 6 for degree value
@@ -185,7 +186,7 @@ function animate() {
     moon.position.y = -9 * Math.cos(degree);
     degree+= 0.001;
   }
-  
+
   orbit();
   // Update VR headset position and apply to camera.
   controls.update();
@@ -198,7 +199,7 @@ function animate() {
 // Reset the position sensor when 'z' pressed.
 function onKey(event) {
   var key = event.keyCode;
-  
+
   switch(key)
   {
     case 90:
@@ -209,34 +210,34 @@ function onKey(event) {
       img.material.map = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source
       img.material.needsUpdate = true;
       break;
-    case 50: 
-      // Change image to 2 on pressing 2 
+    case 50:
+      // Change image to 2 on pressing 2
       img.material.map = THREE.ImageUtils.loadTexture("img1.jpg"); //We will load in images from online source
       img.material.needsUpdate = true;
       break;
-    case 51: 
+    case 51:
       // Change image to 3 on pressing 3
       img.material.map = THREE.ImageUtils.loadTexture("img2.jpg"); //We will load in images from online source
       img.material.needsUpdate = true;
       break;
-    case 52: 
+    case 52:
       // Change image to 4 on pressing 4
       img.material.map = THREE.ImageUtils.loadTexture("img3.jpg"); //We will load in images from online source
       img.material.needsUpdate = true;
       break;
-    case 53: 
+    case 53:
       // Change image to 5 on pressing 5
       img.material.map = THREE.ImageUtils.loadTexture("img4.jpg"); //We will load in images from online source
       img.material.needsUpdate = true;
       break;
-    default: 
+    default:
       break;
   }
   if (event.keyCode == 90) { // z
     controls.resetSensor();
   }
   else if(event.keyCode == 49){
-    
+
   }
 };
 
