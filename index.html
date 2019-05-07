@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 
 <html lang="en">
-<head>
-<title>Space VR</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<style>
-body {
-  background-color: #000;
-  color: #fff;
-  margin: 0px;
-  padding: 0;
-  overflow: hidden;
-}
 
-button{
-  position: absolute;
-  top: 5px;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 64px;
-  height: 64px;
-}
-</style>
+<head>
+  <title>Space VR</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      margin: 0px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    button {
+      position: absolute;
+      top: 5px;
+      left: 0;
+      right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      width: 64px;
+      height: 64px;
+    }
+  </style>
 </head>
 
 <body>
@@ -35,253 +36,200 @@ button{
 </body>
 
 <script>
-// Set this to true to enable the polyfill and split screen rendering
-// even if the device is incompatible with Cardboard (eg. desktop).
-// NOTE: This should never be checked in as true.
-CARDBOARD_DEBUG = false;
+  // Set this to true to enable the polyfill and split screen rendering
+  // even if the device is incompatible with Cardboard (eg. desktop).
+  // NOTE: This should never be checked in as true.
+  CARDBOARD_DEBUG = false;
 </script>
 
 <!--
   three.js 3d library
   -->
 <script src="js/deps/three.js"></script>
+<script src="js/deps/WebVR.js"></script>
 
-<!--
-  VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
-   -->
-<script src="js/deps/VRControls.js"></script>
-
-<!--
-  VREffect.js handles stereo camera setup and rendering.
-  -->
-<script src="js/deps/VREffect.js"></script>
-
-<!--
-  A polyfill for WebVR using the Device{Motion,Orientation}Event API.
-  -->
-<script src="js/deps/webvr-polyfill.js"></script>
-
-<!--
-  Helps enter and exit VR mode, provides best practices while in VR.
-  -->
-<script src="build/webvr-manager.js"></script>
 <script>
-window.onload = function(){
+  var scene, camera, planet, moon, renderer, img, img_bg;
+  var ANIMATION_FREQUENCY = 100;
 
-var renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+  function initScene() {
+    // Create a three.js camera.
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-// Append the canvas element created by the renderer to document body element.
-document.body.appendChild(renderer.domElement);
+    // Create a three.js scene.
+    scene = new THREE.Scene();
 
-// Create a three.js scene.
-var scene = new THREE.Scene();
+    // Add audio
+    var listener = new THREE.AudioListener();
+    camera.add(listener);
 
-// Create a three.js camera.
-var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.3, 10000);
+    var sound = new THREE.Audio(listener);
+    var audioLoader = new THREE.AudioLoader();
+    audioLoader.load("saturn.wav", function (buffer) {
+      sound.setBuffer(buffer);
+      sound.setLoop(true);
+      sound.setVolume(0.5);
+      sound.play();
+    });
 
-// Apply VR headset positional data to camera.
-var controls = new THREE.VRControls(camera);
+    // Create the home planet
 
-// Apply VR stereo rendering to renderer.
-var effect = new THREE.VREffect(renderer);
-effect.setSize(window.innerWidth, window.innerHeight);
+    var geo_earth = new THREE.SphereGeometry(13.5, 32, 32);
+    var txtr_earth = new THREE.TextureLoader().load('earth.jpg');
+    var mat_earth = new THREE.MeshBasicMaterial({ map: txtr_earth });
 
-// Create a VR manager helper to enter and exit VR mode.
-var manager = new WebVRManager(renderer, effect, {hideButton: false});
+    planet = new THREE.Mesh(geo_earth, mat_earth);
+    // Position planet mesh
 
-// Add audio
-var listener = new THREE.AudioListener();
-camera.add(listener);
+    planet.position.z = -1;
+    planet.position.y = -15; // Planet should be directly below the camera
+    planet.add(sound);
+    scene.add(planet);
 
-var sound = new THREE.Audio(listener);
-sound.load("saturn.wav");
-sound.repeat = true;
-sound.autoplay = true;
+    // Create the skybox as a background
+    var boxWidth = 30;
+    var txtr_skybox = new THREE.TextureLoader().load('space.jpg');
+    txtr_skybox.wrapS = THREE.RepeatWrapping;
+    txtr_skybox.wrapT = THREE.RepeatWrapping;
+    //txtr_skybox.repeat.set(2, 2);
 
-// Create the home planet
+    var geo_skybox = new THREE.BoxGeometry(boxWidth, boxWidth, boxWidth);
+    var mat_skybox = new THREE.MeshBasicMaterial({
+      map: txtr_skybox,
+      color: 0xffffff,
+      side: THREE.BackSide
+    });
 
-var geo_earth = new THREE.SphereGeometry(13.5, 32, 32);
-var txtr_earth = THREE.ImageUtils.loadTexture('earth.jpg');
-var mat_earth = new THREE.MeshBasicMaterial({map: txtr_earth});
+    var geo_sun = new THREE.SphereGeometry(2, 32, 32);
+    var mat_sun = new THREE.MeshBasicMaterial({});
 
-var planet = new THREE.Mesh(geo_earth, mat_earth);
-// Position planet mesh
+    var skybox = new THREE.Mesh(geo_skybox, mat_skybox);
+    scene.add(skybox);
 
-planet.position.z = -1;
-planet.position.y = -15; // Planet should be directly below the camera
-planet.add(sound);
-scene.add(planet);
+    // Create moon
+    var geo_moon = new THREE.SphereGeometry(1, 32, 32);
+    var txtr_moon = new THREE.TextureLoader().load('moon.jpg');
+    var mat_moon = new THREE.MeshBasicMaterial({ map: txtr_moon });
 
-// Create the skybox as a background
-var boxWidth = 30;
-var txtr_skybox = THREE.ImageUtils.loadTexture('space.jpg');
-txtr_skybox.wrapS = THREE.RepeatWrapping;
-txtr_skybox.wrapT = THREE.RepeatWrapping;
-//txtr_skybox.repeat.set(2, 2);
+    moon = new THREE.Mesh(geo_moon, mat_moon);
 
-var geo_skybox = new THREE.BoxGeometry(boxWidth, boxWidth, boxWidth);
-var mat_skybox = new THREE.MeshBasicMaterial({
-          map: txtr_skybox,
-          color: 0xffffff,
-          side: THREE.BackSide});
+    moon.position.z = -12;
+    moon.position.x = 9;
+    moon.position.y = 2;
+    scene.add(moon);
 
-var geo_sun = new THREE.SphereGeometry(2, 32, 32);
-var mat_sun = new THREE.MeshBasicMaterial({});
+    // Create Image Viewer Mesh
+    var geo_img = new THREE.BoxGeometry(4, 3, 1);
+    var geo_bg = new THREE.BoxGeometry(4.2, 3.2, 1);
 
-var skybox = new THREE.Mesh(geo_skybox, mat_skybox);
-scene.add(skybox);
+    var txtr_img = new THREE.TextureLoader().load("testimg.jpg"); //We will load in images from online source in future
+    txtr_img.minFilter = THREE.NearestFilter;
 
-// Create moon
-var geo_moon = new THREE.SphereGeometry(1, 32, 32);
-var txtr_moon = THREE.ImageUtils.loadTexture('moon.jpg');
-var mat_moon = new THREE.MeshBasicMaterial({map: txtr_moon});
+    var mat_img = new THREE.MeshBasicMaterial({ map: txtr_img });
+    var mat_bg = new THREE.MeshBasicMaterial();
 
-var moon = new THREE.Mesh(geo_moon, mat_moon);
+    img = new THREE.Mesh(geo_img, mat_img);
+    img_bg = new THREE.Mesh(geo_bg, mat_bg);
 
-moon.position.z = -12;
-moon.position.x = 9;
-moon.position.y = 2;
-scene.add(moon);
+    img.position.z = -4.5;
+    img_bg.position.z = -4.6;
+    img.position.y = 1;
+    img_bg.position.y = 1.05;
 
-// Create Image Viewer Mesh
-var geo_img = new THREE.BoxGeometry(4, 3, 1);
-var geo_bg = new THREE.BoxGeometry(4.2, 3.2, 1);
+    scene.add(img);
+    scene.add(img_bg);
+  }
+  function initRenderer() {
+    renderer = new THREE.WebGLRenderer();
+    renderer.vr.enabled = true;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x555555);
+    document.body.appendChild(renderer.domElement);
+    document.body.appendChild(WEBVR.createButton(renderer));
+    renderer.render(scene, camera);
+    var degree = 0;
 
-var txtr_img = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source in future
-txtr_img.minFilter = THREE.NearestFilter;
+    renderer.setAnimationLoop(function () {
+      planet.rotation.y += 0.0001;
+      moon.position.z = 9 * Math.cos(degree);
+      moon.position.x = 9 * Math.sin(degree);
+      moon.position.y = -9 * Math.cos(degree);
+      degree += 0.001;
+      renderer.render(scene, camera);
+    });
+  }
+  function handleKeyPresses() {
+    window.addEventListener('keydown', onKey, true);
+    // Reset the position sensor when 'z' pressed.
+    function onKey(event) {
+      var key = event.keyCode;
 
-var mat_img = new THREE.MeshBasicMaterial({map: txtr_img});
-var mat_bg = new THREE.MeshBasicMaterial();
+      switch (key) {
+        case 90:
+          controls.resetSensor(); // z
+          break;
+        case 49:
+          // Change image to 1 on pressing 1
+          img.material.map = new THREE.TextureLoader().load("testimg.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 50:
+          // Change image to 2 on pressing 2
+          img.material.map = new THREE.TextureLoader().load("img1.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 51:
+          // Change image to 3 on pressing 3
+          img.material.map = new THREE.TextureLoader().load("img2.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 52:
+          // Change image to 4 on pressing 4
+          img.material.map = new THREE.TextureLoader().load("img3.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 53:
+          // Change image to 5 on pressing 5
+          img.material.map = new THREE.TextureLoader().load("img4.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 54:
+          // Change image to 6 on pressing 6
+          img.material.map = new THREE.TextureLoader().load("img5.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 55:
+          // Change image to 7 on pressing 7
+          img.material.map = new THREE.TextureLoader().load("img6.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 56:
+          // Change image to 8 on pressing 8
+          img.material.map = new THREE.TextureLoader().load("img7.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 57:
+          // Change image to 9 on pressing 9
+          img.material.map = new THREE.TextureLoader().load("img8.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
+        case 48:
+          // Change image to 10 on pressing 0
+          img.material.map = new THREE.TextureLoader().load("img9.jpg"); //We will load in images from online source
+          img.material.needsUpdate = true;
+          break;
 
-var img = new THREE.Mesh(geo_img, mat_img);
-var img_bg = new THREE.Mesh(geo_bg, mat_bg);
-
-img.position.z = -4.5;
-img_bg.position.z = -4.6;
-img.position.y = 1;
-img_bg.position.y = 1.05;
-
-scene.add(img);
-scene.add(img_bg);
-
-// NASA API Key: nEKxa21udlGswSTSsqjon4Kr5PMf2Ghns6S79FNE
-
-var degree = 0;
-
-// Request animation frame loop function
-function animate() {
-  // Apply rotation to planet
-  planet.rotation.y += 0.0001;
-
-  // Radius of moon orbit is 9
-  // Y value stays constant
-  // X, Z orbits circle: x^2 + z^2 = 81
-  // Use Date.GetSeconds() * 6 for degree value
-  // X, Z = 7cos(s), 7sin(s)
-  function orbit()
-  {
-    moon.position.z =  9 * Math.cos(degree);
-    moon.position.x =  9 * Math.sin(degree);
-    moon.position.y = -9 * Math.cos(degree);
-    degree+= 0.001;
+        default:
+          break;
+      }
+    };
   }
 
-  orbit();
-  // Update VR headset position and apply to camera.
-  controls.update();
-
-  // Render the scene through the manager.
-  manager.render(scene, camera);
-
-  requestAnimationFrame(animate);
-}
-// Reset the position sensor when 'z' pressed.
-function onKey(event) {
-  var key = event.keyCode;
-
-  switch(key)
-  {
-    case 90:
-      controls.resetSensor(); // z
-      break;
-    case 49:
-      // Change image to 1 on pressing 1
-      img.material.map = THREE.ImageUtils.loadTexture("testimg.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 50:
-      // Change image to 2 on pressing 2
-      img.material.map = THREE.ImageUtils.loadTexture("img1.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 51:
-      // Change image to 3 on pressing 3
-      img.material.map = THREE.ImageUtils.loadTexture("img2.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 52:
-      // Change image to 4 on pressing 4
-      img.material.map = THREE.ImageUtils.loadTexture("img3.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 53:
-      // Change image to 5 on pressing 5
-      img.material.map = THREE.ImageUtils.loadTexture("img4.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 54:
-      // Change image to 6 on pressing 6
-      img.material.map = THREE.ImageUtils.loadTexture("img5.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 55:
-      // Change image to 7 on pressing 7
-      img.material.map = THREE.ImageUtils.loadTexture("img6.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 56:
-      // Change image to 8 on pressing 8
-      img.material.map = THREE.ImageUtils.loadTexture("img7.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 57:
-      // Change image to 9 on pressing 9
-      img.material.map = THREE.ImageUtils.loadTexture("img8.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    case 48:
-      // Change image to 10 on pressing 0
-      img.material.map = THREE.ImageUtils.loadTexture("img9.jpg"); //We will load in images from online source
-      img.material.needsUpdate = true;
-      break;
-    
-    default:
-      break;
+  window.onload = function () {
+    initScene();
+    initRenderer();
+    handleKeyPresses();
   }
-  if (event.keyCode == 90) { // z
-    controls.resetSensor();
-  }
-  else if(event.keyCode == 49){
-
-  }
-};
-
-
-
-window.addEventListener('keydown', onKey, true);
-
-// Handle window resizes
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-
-  effect.setSize( window.innerWidth, window.innerHeight );
-}
-
-window.addEventListener('resize', onWindowResize, false);
-animate();
-}
 </script>
 
 </html>
